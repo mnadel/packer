@@ -11,17 +11,29 @@ import (
 )
 
 var unpack bool
+var filename string
 
 func init() {
 	flag.BoolVar(&unpack, "u", false, "Unpack")
+	flag.StringVar(&filename, "f", "", "Read from this file (else, stdin)")
 }
 
 func main() {
 	flag.Parse()
 
-	bytes, err := ioutil.ReadAll(os.Stdin)
-	if err != nil {
-		log.Fatalf("Error reading stdin: %v", err)
+	var bytes []byte
+	var err error
+
+	if filename == "" {
+		bytes, err = ioutil.ReadAll(os.Stdin)
+		if err != nil {
+			log.Fatalf("error reading stdin: %v", err)
+		}
+	} else {
+		bytes, err = ioutil.ReadFile(filename)
+		if err != nil {
+			log.Fatalf("error reading %s: %v", filename, err)
+		}
 	}
 
 	if unpack {
@@ -36,7 +48,7 @@ func packBytes(bytes []byte) {
 
 	err := json.Unmarshal(bytes, &v)
 	if err != nil {
-		log.Fatalf("Error unmarshaling JSON: %v", err)
+		log.Fatalf("error unmarshaling json: %v", err)
 	}
 
 	var h codec.MsgpackHandle
@@ -44,7 +56,7 @@ func packBytes(bytes []byte) {
 	enc := codec.NewEncoder(os.Stdout, &h)
 	err = enc.Encode(v)
 	if err != nil {
-		log.Fatalf("Error encoding: %v", err)
+		log.Fatalf("error encoding: %v", err)
 	}
 }
 
@@ -55,12 +67,12 @@ func unpackBytes(bytes []byte) {
 	dec := codec.NewDecoderBytes(bytes, &h)
 	err := dec.Decode(&v)
 	if err != nil {
-		log.Fatalf("Error decoding stream: %v", err)
+		log.Fatalf("error decoding bytes: %v", err)
 	}
 
 	bytes, err = json.Marshal(&v)
 	if err != nil {
-		log.Fatalf("Error decoding JSON: %v", err)
+		log.Fatalf("error decoding json: %v", err)
 	}
 
 	fmt.Println(string(bytes))
