@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -53,7 +54,10 @@ func packBytes(bytes []byte) {
 
 	var h codec.MsgpackHandle
 
-	enc := codec.NewEncoder(os.Stdout, &h)
+	buffered := bufio.NewWriter(os.Stdout)
+	defer buffered.Flush()
+
+	enc := codec.NewEncoder(buffered, &h)
 	err = enc.Encode(v)
 	if err != nil {
 		log.Fatalf("error encoding: %v", err)

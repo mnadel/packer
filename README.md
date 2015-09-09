@@ -10,19 +10,13 @@ Usage
 
 ## Packing
 
-    $ echo '{"a":1}' | packer
-    ��a�?�
-
-    $ echo '{"a":1}' > json
-    $ packer -f json > packed
-    $ cat packed
-    ��a�?�
-
+    $ echo '{"a":1,"b":[2,3,4]}' | packer | tee packed
+    ��a�?��b��@��@
 
 ## Unpacking
 
     $ cat packed | packer -u
-    {"a":1}
+    {"a":1,"b":[2,3,4]}
 
     $ packer -u -f packed
-    {"a":1}
+    {"a":1,"b":[2,3,4]}
